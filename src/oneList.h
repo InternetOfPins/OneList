@@ -43,6 +43,21 @@ struct TypeList {
 };
 
 // ====================== List Core ======================
+
+//aux filter for id api
+
+template <typename T,Sz id> class useId {
+  typedef char yes[1];
+  typedef char no[2];
+  template <typename C>
+  static yes& test(decltype(&C::withId));
+  template <typename> static no& test(...);
+  public:
+  static const bool value= 
+    (!std::is_fundamental_v<T>) 
+    || (sizeof(test<T>(0)) == sizeof(yes) && T::template hasId<id>());
+};
+
 template<typename O, typename... OO>
 struct List {
   using Head = O;
@@ -62,18 +77,31 @@ struct List {
     return tail.foldl(f, std::move(next));
   }
  
-  template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>()||Tail::template hasId<i>();}
+  template<Sz i> static constexpr bool hasId() 
+    {return Head::template hasId<i>()||Tail::template hasId<i>();}
 
-  //TODO: can we filter items that have Id?
-  //thi first approach is too naive for c++, we need more steam here!
+  //const--  
   template<Sz i> constexpr const std::enable_if_t<
-    (!std::is_fundamental_v<Head>)&&Head::template hasId<i>(),
+    !useId<Head,i>::value,
+    decltype(tail.template withId<i>())
+  > withId() const {return tail.template withId<i>();}
+  
+  template<Sz i> constexpr const std::enable_if_t<
+    useId<Head,i>::value,
     Head
   > withId() const {return head;}
-  template<Sz i> constexpr const auto withId() const {return tail.template withId<i>();}
   
-  template<Sz i> constexpr std::enable_if_t<Head::template hasId<i>(),Head> withId() {return head;}
-  template<Sz i> constexpr auto withId() {return tail.template withId<i>();}
+  //--
+  template<Sz i> constexpr std::enable_if_t<
+    !useId<Head,i>::value,
+    decltype(tail.template withId<i>())
+  > withId() 
+    {return tail.template withId<i>();}
+
+  template<Sz i> constexpr std::enable_if_t<
+    useId<Head,i>::value,
+    Head
+  > withId() {return head;}
 };
 
 template<typename O>
@@ -92,10 +120,13 @@ struct List<O> {
   template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>();}
   
   template<Sz i> constexpr std::enable_if_t<
-    (!std::is_fundamental_v<Head>)&&Head::template hasId<i>(),
+    useId<Head,i>::value,
     Head
   > withId() {return head;}
-  template<Sz i> constexpr const std::enable_if_t<Head::template hasId<i>(),Head> withId() const {return head;}
+  template<Sz i> constexpr const std::enable_if_t<
+    useId<Head,i>::value,
+    Head
+  > withId() const {return head;}
 };
 
 // ====================== Factories ======================

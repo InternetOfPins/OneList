@@ -9,6 +9,7 @@ using namespace std;
 
 template<typename Cfg=Nil>
 struct ItemAPI:Cfg {
+  //make all this item types id-able
   static constexpr bool hasId(Sz sid) {return false;}
 };
 
@@ -42,7 +43,7 @@ enum id {op1,op2,op3};
 
 void a3() {cout<<"option #3 activated, this is a side effect."<<endl;}
 
-constexpr auto body{list(ItemDef<Id<id::op1>>{},ItemDef<Id<id::op2>>{},ItemDef<Id<id::op3>,Action<a3>>{})};
+constexpr auto body{list(1,ItemDef<Id<id::op1>>{},ItemDef<Id<id::op2>>{},ItemDef<Id<id::op3>,Action<a3>>{})};
 
 int main() {
   // cout<<tmp.head<<endl;
