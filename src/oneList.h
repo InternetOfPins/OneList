@@ -64,7 +64,12 @@ struct List {
  
   template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>()||Tail::template hasId<i>();}
 
-  template<Sz i> constexpr const std::enable_if_t<Head::template hasId<i>(),Head> withId() const {return head;}
+  //TODO: can we filter items that have Id?
+  //thi first approach is too naive for c++, we need more steam here!
+  template<Sz i> constexpr const std::enable_if_t<
+    (!std::is_fundamental_v<Head>)&&Head::template hasId<i>(),
+    Head
+  > withId() const {return head;}
   template<Sz i> constexpr const auto withId() const {return tail.template withId<i>();}
   
   template<Sz i> constexpr std::enable_if_t<Head::template hasId<i>(),Head> withId() {return head;}
@@ -86,7 +91,10 @@ struct List<O> {
 
   template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>();}
   
-  template<Sz i> constexpr std::enable_if_t<Head::template hasId<i>(),Head> withId() {return head;}
+  template<Sz i> constexpr std::enable_if_t<
+    (!std::is_fundamental_v<Head>)&&Head::template hasId<i>(),
+    Head
+  > withId() {return head;}
   template<Sz i> constexpr const std::enable_if_t<Head::template hasId<i>(),Head> withId() const {return head;}
 };
 

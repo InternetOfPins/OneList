@@ -29,10 +29,11 @@ struct Id {
   };
 };
 
-template<auto f>
+template<auto f>//avr wont support auto here, will have split into <typename F,F&f>
 struct Action {
   template<typename O>
   struct Part:O {
+    //avr wil require -> trail return type
     template<typename... OO> static constexpr auto act(const OO&... oo) {return f(oo...);}
   };
 };
