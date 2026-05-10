@@ -1,0 +1,30 @@
+{
+  "name": "OneList",
+  "version": "0.0.1",
+  "description": "The Happy API - compositional API tools",
+  "keywords": "tool, static, list",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/InternetOfPins/OneList.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Rui Azevedo",
+      "email": "ruihfazevedo@gmail.com",
+      "url": "https://github.com/neu-rah",
+      "maintainer": true
+    },
+    {
+      "name": "@contributor Grok (xAI) - design, refinement & API",
+      "maintainer": false
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/InternetOfPins/OneList",
+  "dependencies": {
+  },
+  "frameworks": "*",
+  "platforms": "*"
+}
