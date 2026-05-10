@@ -41,16 +41,6 @@ struct TypeList {
   using Prepend = TypeList<T, Ts...>;
 };
 
-// Item with Id (core for AM5 RPC / menu navigation)
-template<typename IdT, typename ValueT>
-struct Item {
-  IdT id;
-  ValueT value;
-
-  constexpr Item(IdT i, ValueT v) noexcept 
-    : id(std::move(i)), value(std::move(v)) {}
-};
-
 // ====================== List Core ======================
 template<typename O, typename... OO>
 struct List {
@@ -61,43 +51,37 @@ struct List {
   Head head;
   Tail tail;
 
-  constexpr List(Head h, Tail t) noexcept 
-    : head(std::move(h)), tail(std::move(t)) {}
+  template<typename... TT>
+  constexpr List(Head h, TT... tt) noexcept 
+    : head(std::move(h)), tail(std::move(tt)...) {}
 
-  template<typename SearchId>
-  constexpr const auto withId(SearchId sid) const noexcept->decltype(&head.value) {
-    if constexpr (std::is_same_v<std::decay_t<Head>, Item<SearchId, typename Head::ValueT>>) {
-      if (head.id == sid) return &head.value;
-    }
-    return tail.withId(sid);
+  template<typename F,typename Acc>
+  constexpr auto foldl(F&& f, Acc acc) {
+    auto next = f(acc, head);
+    return tail.foldl( std::forward<F>(f), std::move(next));
   }
+ 
 };
 
 template<typename O>
 struct List<O> {
   using Head = O;
-  using Tail = void;
+  // using Tail = void;<-- and it works, however void is not a type
   using Types = TypeList<O>;
 
   Head head;
 
   constexpr List(Head h) noexcept : head(std::move(h)) {}
 
-  template<typename SearchId>
-  constexpr const auto withId(SearchId) const noexcept->decltype(nullptr) { return nullptr; }
+  template<typename F,typename Acc>
+  constexpr auto foldl(F&& f, Acc acc)
+    {return std::move(f(acc, head));}
+
 };
 
 // ====================== Factories ======================
 template<typename... OO>
-constexpr List<std::decay_t<OO>...> list(OO&&... oo) {return {std::forward<OO>(oo)...};}
-
-template<typename... OO>
-constexpr List<std::decay_t<OO>...> staticBody(OO&&... oo) {return list(std::forward<OO>(oo)...);}
-
-template<typename IdT, typename ValueT>
-constexpr Item<IdT, ValueT> item(IdT id, ValueT value) {
-  return {std::move(id), std::move(value)};
-}
+constexpr List<std::decay_t<OO>...> list(OO&&... oo) {return List<std::decay_t<OO>...>{std::forward<OO>(oo)...};}
 
 // ====================== Helpers ======================
 template<typename L, typename F>
@@ -106,19 +90,3 @@ constexpr void forEach(const L& l, F&& f, int i = 0) {
   if constexpr (!std::is_same_v<typename L::Tail, void>)
     forEach(l.tail, std::forward<F>(f), i + 1);
 }
-
-template<typename L, typename F, typename Acc>
-constexpr auto foldl(const L& l, F&& f, Acc acc) 
-->decltype(std::is_same_v<typename L::Tail, void>?
-    f(acc, l.head): 
-    foldl(l.tail, std::forward<F>(f), std::move(f(acc, l.head))))
-{
-  auto next = f(acc, l.head);
-  return std::is_same_v<typename L::Tail, void>?
-    next: 
-    foldl(l.tail, std::forward<F>(f), std::move(next));
-
-  // if constexpr (std::is_same_v<typename L::Tail, void>) return next;
-  // else return foldl(l.tail, std::forward<F>(f), std::move(next));
-}
-
