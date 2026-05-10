@@ -24,6 +24,7 @@
   "license": "MIT",
   "homepage": "https://github.com/InternetOfPins/OneList",
   "dependencies": {
+    "https://github.com/InternetOfPins/HAPI":"*"
   },
   "frameworks": "*",
   "platforms": "*"

@@ -12,6 +12,9 @@
  * @version 0.3
 */
 
+#include <hapi.h>
+using namespace hapi;
+
 #ifdef __AVR__
   #include <avr_std.h>
   using Sz=int;
@@ -44,20 +47,6 @@ struct TypeList {
 
 // ====================== List Core ======================
 
-//aux filter for id api
-
-template <typename T,Sz id> class useId {
-  typedef char yes[1];
-  typedef char no[2];
-  template <typename C>
-  static yes& test(decltype(&C::withId));
-  template <typename> static no& test(...);
-  public:
-  static const bool value= 
-    (!std::is_fundamental_v<T>) 
-    || (sizeof(test<T>(0)) == sizeof(yes) && T::template hasId<id>());
-};
-
 template<typename O, typename... OO>
 struct List {
   using Head = O;
@@ -77,36 +66,25 @@ struct List {
     return tail.foldl(f, std::move(next));
   }
  
-  template<Sz i> static constexpr bool hasId() 
-    {return Head::template hasId<i>()||Tail::template hasId<i>();}
+  // template<Sz i> static constexpr bool hasId() 
+  //   {return Head::template hasId<i>()||Tail::template hasId<i>();}
 
-  //const--  
-  template<Sz i> constexpr const std::enable_if_t<
-    !useId<Head,i>::value,
-    decltype(tail.template withId<i>())
-  > withId() const {return tail.template withId<i>();}
-  
-  template<Sz i> constexpr const std::enable_if_t<
-    useId<Head,i>::value,
-    Head
-  > withId() const {return head;}
+  // //const--  
+  // template<Sz i> constexpr const auto withId() const 
+  //   {return tail.template withId<i>();}
+ 
+  // template<Sz i> constexpr const Head withId() const {return head;}
   
   //--
-  template<Sz i> constexpr std::enable_if_t<
-    !useId<Head,i>::value,
-    decltype(tail.template withId<i>())
-  > withId() 
-    {return tail.template withId<i>();}
-
-  template<Sz i> constexpr std::enable_if_t<
-    useId<Head,i>::value,
-    Head
-  > withId() {return head;}
+  // template<Sz i> constexpr auto withId() 
+  //   {return tail.template withId<i>();}
+  // template<Sz i> constexpr Head withId() {return head;}
 };
 
 template<typename O>
 struct List<O> {
   using Head = O;
+  using Tail=void;
   using Types = TypeList<O>;
 
   Head head;
@@ -117,16 +95,9 @@ struct List<O> {
   constexpr auto foldl(const F& f, Acc acc) const
     {return std::move(f(acc, head));}
 
-  template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>();}
-  
-  template<Sz i> constexpr std::enable_if_t<
-    useId<Head,i>::value,
-    Head
-  > withId() {return head;}
-  template<Sz i> constexpr const std::enable_if_t<
-    useId<Head,i>::value,
-    Head
-  > withId() const {return head;}
+  // template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>();}
+  // template<Sz i> constexpr Head withId() {return head;}
+  // template<Sz i> constexpr const Head withId() const {return head;}
 };
 
 // ====================== Factories ======================
@@ -143,3 +114,22 @@ constexpr void forEach(const L& l, F&& f, int i = 0) {
   if constexpr (!std::is_same_v<typename L::Tail, void>)
     forEach(l.tail, std::forward<F>(f), i + 1);
 }
+
+template<typename Cfg=Nil>
+struct ListAPI:Cfg {
+  template<typename O> static constexpr bool use() {return true;}
+  template<typename F>
+  static constexpr auto map(const F&,O&& o) {return o;}//defaults to identity
+};
+
+template<typename... OO>
+struct ListDef:APIOf<ListAPI<>,OO...>{
+  using Base=APIOf<ListAPI<>,OO...>;
+  using Base::use;
+  using Base::tail;
+  // auto run() {
+  //   if(use()) return map(f);
+  //   return 
+  // }
+};
+

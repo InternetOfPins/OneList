@@ -48,6 +48,7 @@ constexpr auto body{list(1,ItemDef<Id<id::op1>>{},ItemDef<Id<id::op2>>{},ItemDef
 int main() {
   // cout<<tmp.head<<endl;
   // cout<<foldl(list(1,2,3),[](auto a,auto b){return a+b;},10)<<endl;
-  body.template withId<id::op3>().act();
+  // body.template withId<id::op3>().act();
+  auto x{list()};
   return 0;
 }
