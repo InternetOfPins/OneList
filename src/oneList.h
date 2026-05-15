@@ -12,9 +12,6 @@
  * @version 0.3
 */
 
-#include <hapi.h>
-using namespace hapi;
-
 #ifdef __AVR__
   #include <avr_std.h>
   using Sz=int;
@@ -36,6 +33,8 @@ struct TypeList {
 
   template<typename T>
   static constexpr bool Has = (std::is_same_v<T, Ts> || ...);
+
+  template<template<typename...> class T> using Build=T<Ts...>;
 
   //prefix/suffix or insert/append, Grok?
   template<typename T>
@@ -59,26 +58,6 @@ struct List {
   template<typename... TT>
   constexpr List(Head h, TT... tt) noexcept 
     : head(std::move(h)), tail(std::move(tt)...) {}
-
-  template<typename F,typename Acc>
-  constexpr auto foldl(const F& f, Acc acc) const {
-    auto next = f(acc, head);
-    return tail.foldl(f, std::move(next));
-  }
- 
-  // template<Sz i> static constexpr bool hasId() 
-  //   {return Head::template hasId<i>()||Tail::template hasId<i>();}
-
-  // //const--  
-  // template<Sz i> constexpr const auto withId() const 
-  //   {return tail.template withId<i>();}
- 
-  // template<Sz i> constexpr const Head withId() const {return head;}
-  
-  //--
-  // template<Sz i> constexpr auto withId() 
-  //   {return tail.template withId<i>();}
-  // template<Sz i> constexpr Head withId() {return head;}
 };
 
 template<typename O>
@@ -91,22 +70,23 @@ struct List<O> {
 
   constexpr List(Head h) noexcept : head(std::move(h)) {}
 
-  template<typename F,typename Acc>
-  constexpr auto foldl(const F& f, Acc acc) const
-    {return std::move(f(acc, head));}
-
-  // template<Sz i>static constexpr bool hasId() {return Head::template hasId<i>();}
-  // template<Sz i> constexpr Head withId() {return head;}
-  // template<Sz i> constexpr const Head withId() const {return head;}
 };
 
 // ====================== Factories ======================
 template<typename... OO>
-constexpr List<std::decay_t<OO>...> list(OO&&... oo) {return List<std::decay_t<OO>...>{std::forward<OO>(oo)...};}
+constexpr auto list(OO&&... oo) {
+  return List<std::decay_t<OO>...>{std::forward<OO>(oo)...};
+}
 
 // ====================== Helpers ======================
-template<typename L, typename F,typename O>
-auto foldl(const L& l,const F& f,O o) {return l.foldl(f,std::move(o));}
+template<typename L, typename F, typename Acc>
+constexpr auto foldl(const L& l, F&& f, Acc acc) {
+    auto next = f(acc, l.head);
+    if constexpr (std::is_same_v<typename L::Tail, void>)
+        return next;
+    else
+        return foldl(l.tail, std::forward<F>(f), std::move(next));
+}
 
 template<typename L, typename F>
 constexpr void forEach(const L& l, F&& f, int i = 0) {
@@ -114,22 +94,3 @@ constexpr void forEach(const L& l, F&& f, int i = 0) {
   if constexpr (!std::is_same_v<typename L::Tail, void>)
     forEach(l.tail, std::forward<F>(f), i + 1);
 }
-
-template<typename Cfg=Nil>
-struct ListAPI:Cfg {
-  template<typename O> static constexpr bool use() {return true;}
-  template<typename F>
-  static constexpr auto map(const F&,O&& o) {return o;}//defaults to identity
-};
-
-template<typename... OO>
-struct ListDef:APIOf<ListAPI<>,OO...>{
-  using Base=APIOf<ListAPI<>,OO...>;
-  using Base::use;
-  using Base::tail;
-  // auto run() {
-  //   if(use()) return map(f);
-  //   return 
-  // }
-};
-

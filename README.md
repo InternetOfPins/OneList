@@ -19,7 +19,8 @@ Designed for short menus (AM5), RPC/command systems, configuration, and generic 
 
 - Runtime heterogeneous list (`List<...>`)
 - Compile-time `TypeList` mirror for rules, validation and HAPI integration
-- Built-in `Item<Id, Value>` for RPC / menu actions
+- ~~Built-in `Item<Id, Value>` for RPC / menu actions~~ moving to external composition.
+- `Buid<...>` any given composable type.
 - `withId()` fast lookup (compile-time friendly)
 - `forEach`, `foldl`
 - Full `constexpr` support where possible
