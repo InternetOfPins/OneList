@@ -36,12 +36,17 @@ struct TypeList {
 
   template<template<typename...> class T> using Build=T<Ts...>;
 
-  //prefix/suffix or insert/append, Grok?
-  template<typename T>
-  using Suffix = TypeList<Ts..., T>;
+  template<typename T> using App = TypeList<Ts..., T>;
+  template<typename T> using Ins = TypeList<T, Ts...>;
+};
 
-  template<typename T>
-  using Prefix = TypeList<T, Ts...>;
+template<template<typename...> class Interface>
+struct Composite {
+  template<typename... Ts>
+  struct Body:TypeList<OO...> {
+    template<typename T> using App = Interface<Ts..., T>;
+    template<typename T> using Ins = Interface<T, Ts...>;
+  };
 };
 
 // ====================== List Core ======================
