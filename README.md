@@ -34,10 +34,10 @@ Designed for short menus (AM5), RPC/command systems, configuration, and generic 
 #include "oneList.h"
 
 constexpr auto menu = staticBody(
-    item("led",    []{ digitalWrite(13, !digitalRead(13)); }),
-    item("status", "System OK"),
-    item("reset",  []{ reboot(); }),
-    item("temp",   23.5f)
+  item<Id<1>>("led",    []{ digitalWrite(13, !digitalRead(13)); }),
+  item("status", "System OK"),
+  item("reset",  []{ reboot(); }),
+  item("temp",   23.5f)
 );
 
 // Runtime lookup by Id (great for RPC / buttons)
@@ -46,5 +46,5 @@ if (action) (*action)();
 
 // Type-level introspection
 using TL = decltype(menu)::Types;
-static_assert(TL::Has<Item<const char*, float>>);
+static_assert(TL::has<Id<1>>);
 static_assert(TL::size == 4);
