@@ -24,10 +24,11 @@ namespace hapi::one_list {
 
   // ====================== Runtime List ======================
   template<typename O, typename... OO>
-  struct List:TypeList<O, OO...> {
+  struct List {
     using Head = O;
     using Tail = List<OO...>;
     using Types = TypeList<O, OO...>;
+    static constexpr const bool size{types::size};
     Head head;
     Tail tail;
 
@@ -51,10 +52,11 @@ namespace hapi::one_list {
   };
 
   template<typename O>
-  struct List<O>:TypeList<O> {
+  struct List<O> {
     using Head = O;
     using Tail = void;
     using Types = TypeList<O>;
+    static constexpr const bool size{types::size};
     Head head;
 
     constexpr List() noexcept : head{} {}
