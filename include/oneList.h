@@ -28,7 +28,7 @@ namespace hapi::one_list {
     using Head = O;
     using Tail = List<OO...>;
     using Types = TypeList<O, OO...>;
-    static constexpr const bool size{types::size};
+    static constexpr const size_t size{Types::size};
     Head head;
     Tail tail;
 
@@ -56,7 +56,7 @@ namespace hapi::one_list {
     using Head = O;
     using Tail = void;
     using Types = TypeList<O>;
-    static constexpr const bool size{types::size};
+    static constexpr const size_t size{Types::size};
     Head head;
 
     constexpr List() noexcept : head{} {}
