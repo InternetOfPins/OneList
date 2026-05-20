@@ -1,6 +1,6 @@
 {
   "name": "OneList",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "The Happy API - compositional API tools",
   "keywords": "tool, static, list",
   "repository":
@@ -24,7 +24,9 @@
   "license": "MIT",
   "homepage": "https://github.com/InternetOfPins/OneList",
   "dependencies": {
-    "https://github.com/InternetOfPins/HAPI":"*"
+    "https://github.com/InternetOfPins/HAPI":"*",
+    "https://github.com/InternetOfPins/OneData":"*",
+    "https://github.com/InternetOfPins/OneList":"*"
   },
   "frameworks": "*",
   "platforms": "*"

@@ -24,20 +24,23 @@ namespace hapi::one_list {
 
   // ====================== Runtime List ======================
   template<typename O, typename... OO>
-  struct List {
+  struct List:TypeList<O, OO...> {
     using Head = O;
     using Tail = List<OO...>;
     using Types = TypeList<O, OO...>;
-
     Head head;
     Tail tail;
 
-    // constexpr List(Head h, Tail t) noexcept 
-    //   : head(std::move(h)), tail(std::move(t)) {}
+    constexpr List() noexcept : head{},tail{}{}
 
-    constexpr List(O o,OO... oo) noexcept :
-      head{std::move(o)},
-      tail{std::move(oo)...}
+    constexpr List(O&& o,OO&&... oo) noexcept :
+      head{std::forward<O>(o)},
+      tail{std::forward<OO>(oo)...}
+      {}
+
+    constexpr List(OO&&... oo) noexcept :
+      head{},
+      tail{std::forward<OO>(oo)...}
       {}
 
     template<typename Id>
@@ -48,14 +51,14 @@ namespace hapi::one_list {
   };
 
   template<typename O>
-  struct List<O> {
+  struct List<O>:TypeList<O> {
     using Head = O;
     using Tail = void;
     using Types = TypeList<O>;
-
     Head head;
 
-    constexpr List(Head h) noexcept : head(std::move(h)) {}
+    constexpr List() noexcept : head{} {}
+    constexpr List(Head&& h) noexcept : head(std::forward<Head>(h)) {}
 
     template<typename Id>
     constexpr const auto& withId() const {

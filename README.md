@@ -19,8 +19,7 @@ Designed for short menus (AM5), RPC/command systems, configuration, and generic 
 
 - Runtime heterogeneous list (`List<...>`)
 - Compile-time `TypeList` mirror for rules, validation and HAPI integration
-- ~~Built-in `Item<Id, Value>` for RPC / menu actions~~ moving to external composition.
-- `Buid<...>` any given composable type.
+- `Build<...>` any given composable type.
 - `withId()` fast lookup (compile-time friendly)
 - `forEach`, `foldl`
 - Full `constexpr` support where possible
@@ -34,7 +33,7 @@ Designed for short menus (AM5), RPC/command systems, configuration, and generic 
 #include "oneList.h"
 
 constexpr auto menu = staticBody(
-  item<Id<1>>("led",    []{ digitalWrite(13, !digitalRead(13)); }),
+  item("led",    []{ digitalWrite(13, !digitalRead(13)); }),
   item("status", "System OK"),
   item("reset",  []{ reboot(); }),
   item("temp",   23.5f)
@@ -46,5 +45,5 @@ if (action) (*action)();
 
 // Type-level introspection
 using TL = decltype(menu)::Types;
-static_assert(TL::has<Id<1>>);
+static_assert(TL::has<double>);
 static_assert(TL::size == 4);
