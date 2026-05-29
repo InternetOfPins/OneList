@@ -44,11 +44,11 @@ namespace hapi::one_list {
       tail{std::forward<OO>(oo)...}
       {}
 
-    template<typename Id>
-    constexpr const auto& withId() const {
-      if constexpr (Head::template has<Id>) return head;
-      else return tail.template withId<Id>();
-    }
+    // template<typename Id>
+    // constexpr auto withId() {
+    //   if constexpr (Head::template has<Id>) return head;
+    //   else return tail.template withId<Id>();
+    // }
   };
 
   template<typename O>
@@ -62,11 +62,11 @@ namespace hapi::one_list {
     constexpr List() noexcept : head{} {}
     constexpr List(Head&& h) noexcept : head(std::forward<Head>(h)) {}
 
-    template<typename Id>
-    constexpr const auto& withId() const {
-      static_assert(Types::template has<Id>, "Id not found in List");
-      return head;
-    }
+    // template<typename Id>
+    // constexpr auto withId() {
+    //   static_assert(Types::template has<Id>, "Id not found in List");
+    //   return head;
+    // }
   };
 
   // ====================== Factory ======================
