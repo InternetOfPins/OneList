@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace hapi::one_list {
+namespace oneList {
 
   // ====================== TypeList ======================
   template<typename... Ts>
@@ -83,4 +83,4 @@ namespace hapi::one_list {
       forEach(l.tail, std::forward<F>(f), i + 1);
   }
 
-} // namespace hapi::list
+} // namespace oneList
